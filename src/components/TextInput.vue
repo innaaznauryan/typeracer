@@ -2,9 +2,7 @@
     <textarea 
         :value="modelValue" 
         @input="handleInput" 
-        :class="{'mistake': hasMistake}"
-        rows="10"
-        cols="50">
+        :class="{'mistake': hasMistake}" >
     </textarea>
 </template>
 
@@ -31,8 +29,16 @@ const handleInput = (e: Event) => {
 textarea {
     resize: none;
     outline: none;
+    width: 60%;
+    height: 200px;
 }
 .mistake {
     border: 1px solid red;
+}
+
+@media (max-width: 768px) {
+    textarea {
+        width: 80%;
+    }
 }
 </style>
