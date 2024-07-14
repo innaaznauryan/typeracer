@@ -1,6 +1,13 @@
 <template>
-    <h3>Time:</h3>
-    <span>{{ formatTime }}</span>
+    <h3>
+        <span>Time:</span>
+        <transition name="fade" mode="out-in">
+            <span :key="updateTimerBy" class="counter">{{ updateTimerBy }}</span>
+        </transition>
+    </h3>
+     <transition name="fade" mode="out-in">
+        <div :key="formatTime">{{ formatTime }}</div>
+    </transition>
 </template>
 
 <script setup lang="ts">
@@ -10,23 +17,31 @@ const props = defineProps({
     gameIsOn: {
         type: Boolean,
         required: true,
+    },
+    time: {
+        type: Number,
+        required: true,
+    },
+    updateTimerBy: {
+        type: String,
+        required: true,
     }
 })
-const emit = defineEmits(["stopGame"])
+const emit = defineEmits(["stopGame", "decrementTimer"])
 
-const time = ref<number>(60);
 const intervalId = ref<number | null>(null);
+const timeValue = computed(() => props.time);
 
 const formatTime = computed(() => {
-    const minutes = Math.floor(time.value / 60) + "";
-    const seconds = time.value % 60 + ""
+    const minutes = Math.floor(props.time / 60) + "";
+    const seconds = props.time % 60 + ""
     return `${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}`
 })
 
 const startTimer = () => {
     if (!intervalId.value) {
         intervalId.value = setInterval(() => {
-            time.value--;
+            emit("decrementTimer")
         }, 1000)
     }
 }
@@ -39,8 +54,8 @@ const stopTimer = () => {
     emit("stopGame");
 }
 
-watch(time, () => {
-    if (time.value <= 0) {
+watch(timeValue, () => {
+    if (timeValue.value <= 0) {
         stopTimer();
     }
 })
@@ -54,3 +69,25 @@ onUnmounted(() => {
     stopTimer();
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+h3 {
+    position: relative;
+    display: inline-block;
+}
+
+.counter {
+    position: absolute;
+    right: -100%;
+}
+</style>

@@ -4,7 +4,12 @@
         Start New Game
     </BaseButton>
     <template v-if="gameIsOn">
-        <Timer :gameIsOn="gameIsOn" @stopGame="handleStopGame" />
+        <Timer 
+            :gameIsOn="gameIsOn" 
+            @stopGame="handleStopGame" 
+            :time="time" 
+            @decrementTimer="decrementTimer"
+            :updateTimerBy="updateTimerBy" />
         <TextTemplate :matchingSlice="matchingSlice" :initialSlice="initialSlice" />
         <TextInput v-model="typedText" :hasMistake="hasMistake" />
     </template>
@@ -15,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import BaseButton from "./BaseButton.vue";
 import Timer from "./Timer.vue";
 import TextTemplate from "./TextTemplate.vue";
@@ -29,15 +34,21 @@ const initialSlice = ref<string>("");
 const hasMistake = ref<boolean>(false);
 const gameIsOn = ref<boolean>(false);
 const showResults = ref<boolean>(false);
+const time = ref<number>(10);
+const correctTimes = ref<number>(0);
+const updateTimerBy = ref<string>("");
 
 const handleStartGame = () => {
-    gameIsOn.value = true;
+    const index = Math.floor(Math.random() * texts.length);
+    text.value = texts[index];
+    initialSlice.value = text.value;
     typedText.value = "";
     matchingSlice.value = "";
-    initialSlice.value = text.value;
     hasMistake.value = false;
+    time.value = 10;
+    updateTimerBy.value = "";
     showResults.value = false;
-    resetText();
+    gameIsOn.value = true;
 }
 
 const handleStopGame = () => {
@@ -45,24 +56,45 @@ const handleStopGame = () => {
     gameIsOn.value = false;
 }
 
-const resetText = () => {
-    const index = Math.floor(Math.random() * texts.length);
-    text.value = texts[index];
-    initialSlice.value = text.value;
+const decrementTimer = () => {
+    time.value--
+}
+const incrementTimer = () => {
+    time.value++
+}
+
+const handleMatch = () => {
+    matchingSlice.value = typedText.value;
+    initialSlice.value = text.value.slice(typedText.value.length);
+    hasMistake.value = false;
+    correctTimes.value++;
+    if (correctTimes.value >= 3) {
+        incrementTimer();
+        updateTimerBy.value = "+1";
+        setTimeout(() => {
+            updateTimerBy.value = "";
+        }, 1000);
+        correctTimes.value = 0;
+    }
+    if (matchingSlice.value.length === text.value.length) {
+        handleStopGame();
+    }
+}
+
+const handleMistake = () => {
+    hasMistake.value = true;
+    decrementTimer();
+    updateTimerBy.value = "-1";
+    setTimeout(() => {
+        updateTimerBy.value = "";
+    }, 1000);
 }
 
 watch(typedText, () => {
-    if (typedText.value === text.value.slice(0, typedText.value.length)) { 
-        matchingSlice.value = typedText.value;
-        initialSlice.value = text.value.slice(typedText.value.length);
-        
-        hasMistake.value = false;
+    if (typedText.value === text.value.slice(0, typedText.value.length)) {
+        handleMatch();
     } else {
-        hasMistake.value = true;
+        handleMistake();
     }   
-})
-
-onMounted(() => {
-    resetText();
 })
 </script>
