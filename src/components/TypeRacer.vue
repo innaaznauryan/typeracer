@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref } from "vue";
 import BaseButton from "./BaseButton.vue";
 import Timer from "./Timer.vue";
 import TextTemplate from "./TextTemplate.vue";
@@ -49,6 +49,7 @@ const handleStartGame = () => {
     input.style.pointerEvents = "none";
     document.body.appendChild(input);
     input.focus();
+    input.addEventListener("input", handleInput);
 }
 
 const handleStopGame = () => {
@@ -56,6 +57,7 @@ const handleStopGame = () => {
     gameIsOn.value = false;
     const input = document.querySelector("input");
     if (input) {
+        input.removeEventListener("input", handleInput);
         document.body.removeChild(input);
     }
 }
@@ -94,16 +96,10 @@ const handleMistake = () => {
     }, 1000);
 }
 
-const handleKey = (e: KeyboardEvent) => {
-    if (gameIsOn.value) {
-        e.key === initialSlice.value[0] ? handleMatch() : handleMistake();
+const handleInput = (e: Event) => {
+    if (gameIsOn.value && e.target instanceof HTMLInputElement) {
+        const value = e.target.value;      
+        value[value.length - 1] === initialSlice.value[0] ? handleMatch() : handleMistake();
     }
 }
-
-onMounted(() => {
-    window.addEventListener("keydown", handleKey);
-})
-onUnmounted(() => {
-    window.removeEventListener("keydown", handleKey);
-})
 </script>
