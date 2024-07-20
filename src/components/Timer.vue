@@ -34,14 +34,14 @@ const timeValue = computed(() => props.time);
 
 const formatTime = computed(() => {
     const minutes = Math.floor(props.time / 60) + "";
-    const seconds = props.time % 60 + ""
-    return `${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}`
+    const seconds = props.time % 60 + "";
+    return `${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}`;
 })
 
 const startTimer = () => {
     if (!intervalId.value) {
         intervalId.value = setInterval(() => {
-            emit("decrementTimer")
+            emit("decrementTimer");
         }, 1000)
     }
 }
@@ -75,7 +75,6 @@ onUnmounted(() => {
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
